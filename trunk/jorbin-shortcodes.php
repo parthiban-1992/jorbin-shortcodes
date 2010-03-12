@@ -8,6 +8,32 @@ Version: 0.0
 Author URI: http://aaron.jorb.in/
 License: GPL2
 */
+function jorbin_twitter_trends(){
+
+	$transient='twitter-trends';
+	$url = 'http://search.twitter.com/trends.json';
+
+	if ( $tweet_display = get_transient($transient) ){
+
+	}
+	else{
+		$search = wp_remote_get( $url );
+
+		$results = json_decode($search['body']);
+		$trends = $results->trends;
+		ob_start();
+			echo "<ul class='twitter-trends'>";
+			foreach ($trends as $trend){
+				echo '<li><a href="' . esc_url($trend->url) . '"> '. esc_html($trend->name) . '</a></li>';
+			}
+			echo "</ul>";
+		$tweet_display = ob_get_clean();
+		set_transient($transient, $tweet_display, 120);
+	}
+	return $tweet_display;
+}
+
+add_shortcode('twitter-trends', 'jorbin_twitter_trends');
 
 function jorbin_firestream_search($atts){
 	extract(shortcode_atts(array(
@@ -40,7 +66,6 @@ function jorbin_firestream_search($atts){
 	else {
 
 		$search = wp_remote_get( $url );
-
 		$results = json_decode($search['body']);
 
 		ob_start();
