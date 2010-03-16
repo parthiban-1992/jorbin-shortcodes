@@ -58,7 +58,6 @@ function jorbin_firestream_search($atts){
 		$url .= '&since_id=' . (int) $since_id;
 		$transient .= '&s=' . (int) $since_id;
 	}
-	var_dump($transient);
 
 	if ( $tweet_display = get_transient($transient) ){
 		// It's allready been brought
