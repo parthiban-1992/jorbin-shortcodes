@@ -64,7 +64,8 @@ function jorbin_firestream_search($atts){
 	}
 	else {
 
-		$search = wp_remote_get( $url );
+		if ($search = wp_remote_get( $url ) ){
+
 		$results = json_decode($search['body']);
 
 		ob_start();
@@ -74,16 +75,21 @@ function jorbin_firestream_search($atts){
 				$tweetcontent = $tweet->text;
 				$newcontent = preg_replace('%@([^\s]*)%', "<a href='http://twitter.com/\\1' >@\\1</a>", $tweetcontent);
 				echo "<div class='twitter_shortcode' ><p>
-				<img class='twitter_shortcode_image' src='".esc_url($tweet->profile_image_url)."' class='twitter_shortcode_image'  /><span class='twitter_shotcode_username'><a href='http://twitter.com/".$tweet->from_user."' >".$tweet->from_user."</a>&nbsp;&mdash;&nbsp;</span>$newcontent</p>
+				<img class='twitter_shortcode_image' src='".esc_url($tweet->profile_image_url)."' class='twitter_shortcode_image'  /><span class='twitter_shotcode_username'><a href='http://twitter.com/".$tweet->from_user."' >".$tweet->from_user."</a>&nbsp;&mdash;&nbsp;</span>". $newcontent ."</p>
 				</div>";
 
 			}
 		$tweet_display = ob_get_clean();
-		set_transient($transient, $tweet_display, 120);
+		set_transient($transient, $tweet_display, 300);
 		}
-	return $tweet_display;
+		else
+		{
+			$tweet_display = "I'm sorry, no tweets are availailable at this time";
+		}
+	}
+	return apply_filters('jorbin_tweet_content', $tweet_display) ;
 }
-
+add_filter('jorbin_tweet_content', 'make_clickable' );
 add_shortcode('twitter-search', 'jorbin_firestream_search');
 
 //Allow text widgets to use shortcodes
@@ -121,7 +127,7 @@ function twitter_status($atts){
 		}
 		$tweet_display = ob_get_clean();
 		set_transient($transient, $tweet_display, 120);
-		return $tweet_display;
+		return apply_filters('jorbin_tweet_content', $tweet_display);
 	}
 	else
 	{
